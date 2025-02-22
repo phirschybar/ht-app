@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DayCard from '@/Components/DayCard';
 
 export default function Dashboard() {
     const [dashboardData, setDashboardData] = useState({
@@ -29,6 +30,20 @@ export default function Dashboard() {
         fetchDashboardData(date);
     };
 
+    const handleDayUpdate = async (dayData) => {
+        try {
+            await axios.post('/api/dashboard/update-day', {
+                date: dayData.date,
+                field: dayData.field,
+                value: dayData.value
+            });
+            // Refresh the dashboard data after update
+            await fetchDashboardData(dashboardData.current_month);
+        } catch (error) {
+            console.error('Error updating day:', error);
+        }
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title="Dashboard" />
@@ -54,7 +69,16 @@ export default function Dashboard() {
                                     &gt;
                                 </button>
                             </div>
-                            {/* Additional dashboard content will go here */}
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {dashboardData.days.map((day) => (
+                                    <DayCard 
+                                        key={day.date} 
+                                        day={day} 
+                                        onDayUpdate={handleDayUpdate}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
