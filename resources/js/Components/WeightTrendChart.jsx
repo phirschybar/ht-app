@@ -1,14 +1,14 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 export default function WeightTrendChart({ days }) {
-    // Filter out days without weight data and map to simpler format
-    const chartData = days.filter(day => day.weight || day.trend).map(day => ({
+    // Map all days, keeping nulls for missing data
+    const chartData = days.map(day => ({
         name: parseInt(day.date.split('-')[2]), // Convert to integer to remove leading zeros
-        weight: day.weight,
-        trend: day.trend
+        weight: day.weight || null,
+        trend: day.trend || null
     }));
 
-    // Calculate min and max values for Y axis
+    // Calculate min and max values for Y axis (only from days with data)
     const allValues = chartData.flatMap(data => [data.weight, data.trend].filter(Boolean));
     const minValue = Math.floor(Math.min(...allValues)); // Round down to integer
     const maxValue = Math.ceil(Math.max(...allValues)); // Round up to integer
@@ -32,14 +32,14 @@ export default function WeightTrendChart({ days }) {
                         stroke="#9CA3AF"
                         angle={0}
                         height={30}
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 11 }}
                     />
                     <YAxis 
                         stroke="#9CA3AF"
                         domain={[minValue - padding, maxValue + padding]}
                         tickCount={maxValue - minValue + 3}
                         allowDecimals={false}
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 11 }}
                     />
                     <Tooltip
                         contentStyle={{
