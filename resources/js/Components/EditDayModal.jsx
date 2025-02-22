@@ -1,15 +1,42 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
+    // State to track input values and validation
+    const [formData, setFormData] = useState({
+        weight: day.weight || '',
+        exercise_rung: day.exercise_rung || '',
+        notes: day.notes || ''
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        
+        // Handle numeric fields
+        if (name === 'weight' || name === 'exercise_rung') {
+            // Allow empty string or valid numbers
+            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            }
+        } else {
+            // Handle notes normally
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
         onSave({
             date: day.date,
-            weight: formData.get('weight') || null,
-            exercise_rung: formData.get('exercise_rung') || null,
-            notes: formData.get('notes') || null
+            weight: formData.weight === '' ? null : parseFloat(formData.weight),
+            exercise_rung: formData.exercise_rung === '' ? null : parseFloat(formData.exercise_rung),
+            notes: formData.notes || null
         });
     };
 
@@ -25,7 +52,7 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black bg-opacity-25" />
+                    <div className="fixed inset-0 bg-black bg-opacity-75" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
@@ -39,47 +66,52 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
                                 <Dialog.Title
                                     as="h3"
-                                    className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                                    className="text-lg font-medium leading-6 text-gray-100 mb-4"
                                 >
                                     Edit {day.name}
                                 </Dialog.Title>
                                 <form onSubmit={handleSubmit}>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-300">
                                                 Weight
                                             </label>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 name="weight"
-                                                step="0.1"
-                                                defaultValue={day.weight || ''}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                value={formData.weight}
+                                                onChange={handleInputChange}
+                                                placeholder="Enter weight"
+                                                className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-300">
                                                 Exercise Rung
                                             </label>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 name="exercise_rung"
-                                                defaultValue={day.exercise_rung || ''}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                value={formData.exercise_rung}
+                                                onChange={handleInputChange}
+                                                placeholder="Enter rung number"
+                                                className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">
+                                            <label className="block text-sm font-medium text-gray-300">
                                                 Notes
                                             </label>
                                             <textarea
                                                 name="notes"
                                                 rows={3}
-                                                defaultValue={day.notes || ''}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                value={formData.notes}
+                                                onChange={handleInputChange}
+                                                placeholder="Add notes"
+                                                className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                             />
                                         </div>
                                     </div>
@@ -87,13 +119,13 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
                                         <button
                                             type="button"
                                             onClick={closeModal}
-                                            className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                            className="inline-flex justify-center rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
                                         >
                                             Save
                                         </button>
