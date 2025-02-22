@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DayCard from '@/Components/DayCard';
+import WeightTrendChart from '@/Components/WeightTrendChart';
 
 export default function Dashboard({ auth }) {
     const [dashboardData, setDashboardData] = useState({
@@ -70,6 +71,10 @@ export default function Dashboard({ auth }) {
                                 >
                                     &gt;
                                 </button>
+                            </div>
+
+                            <div className="mb-0">
+                                <WeightTrendChart days={dashboardData.days} />
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
