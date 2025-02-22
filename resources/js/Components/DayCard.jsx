@@ -21,6 +21,21 @@ export default function DayCard({ day, onDayUpdate }) {
         setIsEditModalOpen(false);
     };
 
+    // Helper function to format the variation with a sign and color
+    const renderVariation = () => {
+        if (!day.variation) return null;
+        
+        const isPositive = day.variation > 0;
+        const color = isPositive ? 'text-red-400' : 'text-green-400';
+        const sign = isPositive ? '+' : '';
+        
+        return (
+            <span className={color}>
+                ({sign}{day.variation.toFixed(1)})
+            </span>
+        );
+    };
+
     return (
         <>
             <div 
@@ -36,7 +51,7 @@ export default function DayCard({ day, onDayUpdate }) {
                     {day.is_editable && (
                         <button 
                             onClick={(e) => {
-                                e.stopPropagation(); // Prevent double-triggering the modal
+                                e.stopPropagation();
                                 setIsEditModalOpen(true);
                             }}
                             className="text-blue-400 hover:text-blue-300"
@@ -52,6 +67,17 @@ export default function DayCard({ day, onDayUpdate }) {
                         <span className="text-gray-400">Weight:</span>
                         <span className="text-gray-100">{day.weight || '—'}</span>
                     </div>
+                    {day.weight && day.trend && (
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Trend:</span>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-blue-400">
+                                    {day.trend.toFixed(1)}
+                                </span>
+                                {renderVariation()}
+                            </div>
+                        </div>
+                    )}
                     <div className="flex justify-between">
                         <span className="text-gray-400">Exercise Rung:</span>
                         <span className="text-gray-100">{day.exercise_rung || '—'}</span>

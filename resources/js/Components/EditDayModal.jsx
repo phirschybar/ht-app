@@ -1,13 +1,21 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
-    // State to track input values and validation
+    const weightInputRef = useRef(null);
     const [formData, setFormData] = useState({
         weight: day.weight || '',
         exercise_rung: day.exercise_rung || '',
         notes: day.notes || ''
     });
+
+    useEffect(() => {
+        if (isOpen && weightInputRef.current) {
+            setTimeout(() => {
+                weightInputRef.current?.focus();
+            }, 100);
+        }
+    }, [isOpen]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -42,7 +50,12 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={closeModal}>
+            <Dialog 
+                as="div" 
+                className="relative z-10" 
+                onClose={closeModal}
+                initialFocus={weightInputRef}
+            >
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -73,18 +86,20 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
                                 >
                                     Edit {day.name}
                                 </Dialog.Title>
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={handleSubmit} autoComplete="off">
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300">
                                                 Weight
                                             </label>
                                             <input
+                                                ref={weightInputRef}
                                                 type="text"
                                                 name="weight"
                                                 value={formData.weight}
                                                 onChange={handleInputChange}
                                                 placeholder="Enter weight"
+                                                autoComplete="off"
                                                 className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                             />
                                         </div>
@@ -98,6 +113,7 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
                                                 value={formData.exercise_rung}
                                                 onChange={handleInputChange}
                                                 placeholder="Enter rung number"
+                                                autoComplete="off"
                                                 className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                             />
                                         </div>
@@ -111,6 +127,7 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
                                                 value={formData.notes}
                                                 onChange={handleInputChange}
                                                 placeholder="Add notes"
+                                                autoComplete="off"
                                                 className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                             />
                                         </div>
