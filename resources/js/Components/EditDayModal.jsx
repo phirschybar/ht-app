@@ -44,7 +44,8 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
             date: day.date,
             weight: formData.weight === '' ? null : parseFloat(formData.weight),
             exercise_rung: formData.exercise_rung === '' ? null : parseFloat(formData.exercise_rung),
-            notes: formData.notes || null
+            notes: formData.notes || null,
+            month: day.date.substring(0, 7)
         });
     };
 

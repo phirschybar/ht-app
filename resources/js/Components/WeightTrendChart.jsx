@@ -8,11 +8,19 @@ export default function WeightTrendChart({ days }) {
         trend: day.trend || null
     }));
 
+    // Check if there's any weight data at all
+    const hasData = chartData.some(day => day.weight !== null);
+    
+    // If no data, don't render the chart
+    if (!hasData) {
+        return null;
+    }
+
     // Calculate min and max values for Y axis (only from days with data)
     const allValues = chartData.flatMap(data => [data.weight, data.trend].filter(Boolean));
-    const minValue = Math.floor(Math.min(...allValues)); // Round down to integer
-    const maxValue = Math.ceil(Math.max(...allValues)); // Round up to integer
-    const padding = 1; // Use 1 unit padding instead of percentage
+    const minValue = Math.floor(Math.min(...allValues));
+    const maxValue = Math.ceil(Math.max(...allValues));
+    const padding = 1;
 
     return (
         <div className="h-[300px] w-full">
@@ -59,7 +67,7 @@ export default function WeightTrendChart({ days }) {
                                     { x: point.name, y: point.weight },
                                     { x: point.name, y: point.trend }
                                 ]}
-                                stroke="#FFFFFF"
+                                stroke={point.weight > point.trend ? 'rgb(255, 99, 132)' : 'rgb(75, 192, 192)'}
                                 strokeWidth={2}
                                 ifOverflow="visible"
                             />
@@ -69,7 +77,21 @@ export default function WeightTrendChart({ days }) {
                         type="monotone"
                         dataKey="weight"
                         stroke="#FFFFFF"
-                        dot={{ r: 4 }}
+                        dot={(props) => {
+                            if (props.payload.weight && props.payload.trend) {
+                                const color = props.payload.weight > props.payload.trend 
+                                    ? 'rgb(255, 99, 132)'  // Above trend - red
+                                    : 'rgb(75, 192, 192)'  // Below trend - green
+                                return <circle 
+                                    key={`weight-dot-${props.payload.name}`}
+                                    cx={props.cx} 
+                                    cy={props.cy} 
+                                    r={3} 
+                                    fill={color} 
+                                />
+                            }
+                            return null;
+                        }}
                         strokeWidth={0}
                         connectNulls={false}
                         name="Weight"
@@ -78,8 +100,22 @@ export default function WeightTrendChart({ days }) {
                     <Line
                         type="monotone"
                         dataKey="trend"
-                        stroke="#60A5FA"
-                        dot={{ r: 4 }}
+                        stroke="rgb(255, 99, 132)"
+                        dot={(props) => {
+                            if (props.payload.weight && props.payload.trend) {
+                                const color = props.payload.weight > props.payload.trend 
+                                    ? 'rgb(255, 99, 132)'  // Weight above trend - red
+                                    : 'rgb(75, 192, 192)'  // Weight below trend - green
+                                return <circle 
+                                    key={`trend-dot-${props.payload.name}`}
+                                    cx={props.cx} 
+                                    cy={props.cy} 
+                                    r={3} 
+                                    fill={color} 
+                                />
+                            }
+                            return null;
+                        }}
                         strokeWidth={2}
                         connectNulls={true}
                         name="Trend"

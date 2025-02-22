@@ -33,15 +33,58 @@ export default function Dashboard({ auth }) {
 
     const handleDayUpdate = async (dayData) => {
         try {
-            await axios.post('/api/dashboard/update-day', {
-                date: dayData.date,
-                field: dayData.field,
-                value: dayData.value
-            });
-            // Refresh the dashboard data after update
-            await fetchDashboardData(dashboardData.current_month);
+            console.log('Received dayData:', dayData);
+            
+            // If we receive the field/value format directly, send it straight through
+            if (dayData.field && dayData.value !== undefined) {
+                await axios.post('/api/dashboard/update-day', {
+                    date: dayData.date,
+                    field: dayData.field,
+                    value: dayData.value
+                });
+            } else {
+                // Handle the multi-field format (from the modal)
+                const updatePromises = [];
+                
+                if (dayData.weight !== undefined) {
+                    updatePromises.push(
+                        axios.post('/api/dashboard/update-day', {
+                            date: dayData.date,
+                            field: 'weight',
+                            value: dayData.weight
+                        })
+                    );
+                }
+                
+                if (dayData.exercise_rung !== undefined) {
+                    updatePromises.push(
+                        axios.post('/api/dashboard/update-day', {
+                            date: dayData.date,
+                            field: 'exercise_rung',
+                            value: dayData.exercise_rung
+                        })
+                    );
+                }
+                
+                if (dayData.notes !== undefined) {
+                    updatePromises.push(
+                        axios.post('/api/dashboard/update-day', {
+                            date: dayData.date,
+                            field: 'notes',
+                            value: dayData.notes
+                        })
+                    );
+                }
+                
+                await Promise.all(updatePromises);
+            }
+            
+            // Extract month from the date for refreshing
+            const month = dayData.month || dayData.date.substring(0, 7);
+            await fetchDashboardData(month);
+            
         } catch (error) {
-            console.error('Error updating day:', error);
+            console.error('Error updating day:', error.response?.data || error);
         }
     };
 
