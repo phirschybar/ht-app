@@ -30,4 +30,6 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
     
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/dashboard/update-day', [DashboardController::class, 'updateDay']);
+    Route::get('/dashboard/{date?}', [DashboardController::class, 'index'])
+        ->where('date', '\d{4}-\d{2}');
 });

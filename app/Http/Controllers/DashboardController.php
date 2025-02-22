@@ -97,11 +97,11 @@ class DashboardController extends Controller
         return 0;
     }
 
-    public function index(Request $request)
+    public function index(Request $request, $date = null)
     {
         // Get selected month or default to current month
-        $selected_date = $request->get('date') 
-            ? Carbon::createFromFormat('Y-m', $request->get('date'))
+        $selected_date = $date 
+            ? Carbon::createFromFormat('Y-m', $date)
             : now();
             
         $current_month_name = $selected_date->format('F Y');
@@ -109,7 +109,7 @@ class DashboardController extends Controller
         $next_month = $selected_date->copy()->addMonth()->format('Y-m');
 
         // Get all data using the service
-        $data = $this->chartDataService->getData($request->get('date'));
+        $data = $this->chartDataService->getData($date);
 
         return response()->json([
             'days' => $data['days'],
