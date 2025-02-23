@@ -17,7 +17,6 @@ export default function Logs({ auth }) {
     const fetchDashboardData = async (date = '') => {
         try {
             const response = await axios.get(`/api/logs${date ? `/${date}` : ''}`);
-            console.log('Received data:', response.data);
             setDashboardData(response.data);
         } catch (error) {
             console.error('Error fetching logs data:', error);
@@ -34,7 +33,6 @@ export default function Logs({ auth }) {
 
     const handleDayUpdate = async (dayData) => {
         try {
-            console.log('Received dayData:', dayData);
             
             if (dayData.field && dayData.value !== undefined) {
                 await axios.post('/api/logs/update-day', {

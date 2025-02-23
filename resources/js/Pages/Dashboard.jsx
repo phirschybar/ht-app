@@ -74,7 +74,7 @@ export default function Dashboard({ auth }) {
                             {/* Stats Section */}
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                                 <div 
-                                    className="a-stat p-4 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors duration-200"
+                                    className="a-stat p-4 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors duration-200 min-h-[140px]"
                                     onClick={() => setIsEditModalOpen(true)}
                                 >
                                     <div className="flex justify-between items-start">
@@ -93,7 +93,7 @@ export default function Dashboard({ auth }) {
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
-                                            <span className="text-gray-100 text-4xl mt-2">{dashboardData.stats?.current_weight || ''}</span>
+                                            <span className="text-gray-100 text-3xl mt-2">{dashboardData.stats?.current_weight || ''}</span>
                                         </div>
                                         {dashboardData.stats?.current_weight && dashboardData.stats?.current_trend && (
                                             <div className="flex justify-between">
@@ -103,8 +103,8 @@ export default function Dashboard({ auth }) {
                                                     </span>
                                                     {dashboardData.stats.current_variation && (
                                                         <span className={dashboardData.stats.current_variation > 0 ? 'text-red-400' : 'text-green-400'}>
-                                                            ({dashboardData.stats.current_variation > 0 ? '+' : ''}
-                                                            {dashboardData.stats.current_variation.toFixed(1)})
+                                                            {dashboardData.stats.current_variation > 0 ? '↑' : '↓'}
+                                                            {Math.abs(dashboardData.stats.current_variation.toFixed(1))}
                                                         </span>
                                                     )}
                                                 </div>
@@ -112,16 +112,34 @@ export default function Dashboard({ auth }) {
                                         )}
                                     </div>
                                 </div>
-                                <div className="a-stat p-4 bg-gray-700 rounded-lg">
-                                    <h3 className="text-gray-400 text-xs md:text-base">Days Logged</h3>
-                                    <p className="text-2xl text-white">
-                                        {dashboardData.stats?.total_days_logged || '0'}
+                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
+                                    <h3 className="text-gray-400 text-xs md:text-base">Trend Streak</h3>
+                                    <p className="text-3xl mt-2 text-white">
+                                        24 days
                                     </p>
                                 </div>
-                                <div className="a-stat p-4 bg-gray-700 rounded-lg">
+                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
                                     <h3 className="text-gray-400 text-xs md:text-base">30-Day Change</h3>
-                                    <p className="text-2xl text-white">
-                                        {dashboardData.stats?.weight_change ? `${dashboardData.stats.weight_change > 0 ? '+' : ''}${dashboardData.stats.weight_change} kg` : '-'}
+                                    <p className="text-3xl mt-2 text-white">
+                                        <span className="text-green-400">↓</span> 1.2 lbs
+                                    </p>
+                                </div>
+                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
+                                    <h3 className="text-gray-400 text-xs md:text-base">Body Mass Index</h3>
+                                    <p className="text-3xl mt-2 text-white">
+                                         25.9 &nbsp;<span className="text-orange-400">🟡</span>
+                                    </p>
+                                </div>
+                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
+                                    <h3 className="text-gray-400 text-xs md:text-base">Daily Calorie Deficit</h3>
+                                    <p className="text-3xl mt-2 text-white">
+                                        <span className="text-green-400">↓</span> 1,200
+                                    </p>
+                                </div>
+                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
+                                    <h3 className="text-gray-400 text-xs md:text-base">Avg Weekly Loss</h3>
+                                    <p className="text-3xl mt-2 text-white">
+                                        <span className="text-green-400">↓</span> 0.4 lbs
                                     </p>
                                 </div>
                             </div>
@@ -129,9 +147,6 @@ export default function Dashboard({ auth }) {
                     </div>
                 </div>
             </div>
-
-            {console.log('Dashboard stats:', dashboardData.stats)}
-            {console.log('Dashboard today:', dashboardData.stats?.today)}
             
             <EditDayModal
                 isOpen={isEditModalOpen}

@@ -27,11 +27,10 @@ export default function DayCard({ day, onDayUpdate }) {
         
         const isPositive = day.variation > 0;
         const color = isPositive ? 'text-red-400' : 'text-green-400';
-        const sign = isPositive ? '+' : '';
         
         return (
             <span className={color}>
-                ({sign}{day.variation.toFixed(1)})
+                {isPositive ? '↑' : '↓'}{Math.abs(day.variation.toFixed(1))}
             </span>
         );
     };
@@ -71,10 +70,10 @@ export default function DayCard({ day, onDayUpdate }) {
                         <div className="flex justify-between">
                             <span className="text-gray-400">Trend:</span>
                             <div className="flex items-baseline gap-2">
+                                {renderVariation()}
                                 <span className="text-blue-400">
                                     {day.trend.toFixed(1)}
                                 </span>
-                                {renderVariation()}
                             </div>
                         </div>
                     )}
