@@ -28,13 +28,7 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
         ]);
     });
     
-    Route::get('/dashboard', function() {
-        return response()->json([
-            'message' => 'Hello World',
-            'status' => 'success'
-        ]);
-    });
-
+    Route::get('/dashboard', [DashboardController::class, 'getDashboardData']);
     Route::get('/logs', [DashboardController::class, 'index']);
     Route::post('/logs/update-day', [DashboardController::class, 'updateDay']);
     Route::get('/logs/{date?}', [DashboardController::class, 'index'])

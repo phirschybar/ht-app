@@ -16,24 +16,30 @@ class ChartDataService
         $this->weightTrendService = $weightTrendService;
     }
 
-    public function getData(?string $date = null)
+    public function getData(?string $date = null, array $options = [])
     {
-        $selected_date = $date ? Carbon::createFromFormat('Y-m', $date) : now();
-        $current_month = $selected_date->format('m');
-        $current_year = $selected_date->format('Y');
-        $year_month = $current_year . '-' . $current_month;
-        $n_days_in_month = $selected_date->daysInMonth;
+        // If start_date and end_date are provided, use those instead of month-based logic
+        if (isset($options['start_date']) && isset($options['end_date'])) {
+            $startDate = Carbon::parse($options['start_date']);
+            $endDate = Carbon::parse($options['end_date']);
+        } else {
+            // Original month-based logic
+            $selected_date = $date ? Carbon::createFromFormat('Y-m', $date) : now();
+            $startDate = $selected_date->copy()->startOfMonth();
+            $endDate = $selected_date->copy()->endOfMonth();
+        }
 
         $days = [];
         
-        // First pass: collect all days
-        for ($i = 1; $i <= $n_days_in_month; $i++) {
-            $date = $year_month . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
-            $dayRecord = Day::where('date', $date)
+        // Iterate through each day in the date range
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $dateStr = $currentDate->format('Y-m-d');
+            $dayRecord = Day::where('date', $dateStr)
                            ->where('user_id', Auth::id())
                            ->first();
 
-            $isFutureDate = Carbon::parse($date)->isAfter(now());
+            $isFutureDate = $currentDate->isAfter(now());
             
             $weight = null;
             if ($dayRecord?->weight !== null) {
@@ -45,13 +51,13 @@ class ChartDataService
             // Get trend and variation using recalculateForDate
             $calculations = null;
             if (!$isFutureDate && $dayRecord) {
-                $calculations = $this->weightTrendService->recalculateForDate($date);
+                $calculations = $this->weightTrendService->recalculateForDate($dateStr);
             }
 
             $days[] = [
-                'day' => $i,
-                'name' => date('D, jS', strtotime($date)),
-                'date' => $date,
+                'day' => (int)$currentDate->format('d'),
+                'name' => $currentDate->format('D, jS'),
+                'date' => $dateStr,
                 'weight' => $weight,
                 'trend' => $calculations ? $calculations['trend'] : null,
                 'variation' => $calculations ? $calculations['variation'] : null,
@@ -59,6 +65,8 @@ class ChartDataService
                 'notes' => $dayRecord?->notes,
                 'is_editable' => !$isFutureDate,
             ];
+
+            $currentDate->addDay();
         }
 
         $chartData = [
@@ -74,7 +82,13 @@ class ChartDataService
         ];
 
         Log::info('Final chart data', [
-            'chartData' => $chartData
+            'date_range' => [
+                'start' => $startDate->format('Y-m-d'),
+                'end' => $endDate->format('Y-m-d')
+            ],
+            'days_count' => count($days),
+            'first_day' => $days[0] ?? null,
+            'last_day' => end($days) ?? null
         ]);
 
         return [

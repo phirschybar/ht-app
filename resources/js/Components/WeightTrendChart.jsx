@@ -1,6 +1,7 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 export default function WeightTrendChart({ days }) {
+    
     // Map all days, keeping nulls for missing data
     const chartData = days.map(day => ({
         name: parseInt(day.date.split('-')[2]), // Convert to integer to remove leading zeros

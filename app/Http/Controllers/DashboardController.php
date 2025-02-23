@@ -36,14 +36,11 @@ class DashboardController extends Controller
         }
 
         // Calculate trend using exponential moving average
-        if ($trend > 0) {
-            foreach ($weights as $date => $weight) {
-                if (!empty($weight) && $weight > 0) {
-                    // Using same formula as original: trend + ((weight - trend) / 10)
-                    $trend = $trend + (($weight - $trend) / 10);
-                }
-                $trends[$date] = $trend > 0 ? round($trend, 1) : null;
+        foreach ($weights as $weight) {
+            if (!empty($weight) && $weight > 0) {
+                $trend = $trend + (($weight - $trend) / 10);
             }
+            $trends[] = $trend > 0 ? round($trend, 1) : null;
         }
 
         return $trends;
@@ -136,5 +133,43 @@ class DashboardController extends Controller
         $day->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function getDashboardData()
+    {
+        $endDate = now()->startOfDay();
+        $startDate = $endDate->copy()->subDays(29)->startOfDay();
+        
+        // Get the data using the ChartDataService with explicit date range
+        $data = $this->chartDataService->getData(null, [
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d')
+        ]);
+
+        // Get the trends array safely
+        $trends = $data['chartData']['trends'] ?? [];
+        $lastTrend = !empty($trends) ? end($trends) : null;
+
+        return response()->json([
+            'days' => $data['days'],
+            'stats' => [
+                'current_weight' => $lastTrend,
+                'total_days_logged' => collect($data['days'])->filter(fn($day) => !is_null($day['weight']))->count(),
+                'weight_change' => $this->calculateWeightChange($trends)
+            ]
+        ]);
+    }
+
+    private function calculateWeightChange($trends)
+    {
+        $validTrends = array_filter($trends);
+        if (count($validTrends) < 2) {
+            return null;
+        }
+        
+        $firstTrend = reset($validTrends);
+        $lastTrend = end($validTrends);
+        
+        return round($lastTrend - $firstTrend, 1);
     }
 } 
