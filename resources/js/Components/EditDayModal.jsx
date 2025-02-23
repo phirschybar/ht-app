@@ -17,6 +17,14 @@ export default function EditDayModal({ isOpen, closeModal, day, onSave }) {
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        setFormData({
+            weight: day.weight || '',
+            exercise_rung: day.exercise_rung || '',
+            notes: day.notes || ''
+        });
+    }, [day]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         

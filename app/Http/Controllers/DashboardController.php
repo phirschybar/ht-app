@@ -140,22 +140,42 @@ class DashboardController extends Controller
         $endDate = now()->startOfDay();
         $startDate = $endDate->copy()->subDays(29)->startOfDay();
         
+        // Get today's data
+        $today = Day::where('user_id', auth()->id())
+            ->where('date', $endDate->format('Y-m-d'))
+            ->first();
+        
         // Get the data using the ChartDataService with explicit date range
         $data = $this->chartDataService->getData(null, [
             'start_date' => $startDate->format('Y-m-d'),
             'end_date' => $endDate->format('Y-m-d')
         ]);
 
-        // Get the trends array safely
+        // Get the trends and weights arrays safely
         $trends = $data['chartData']['trends'] ?? [];
+        $weights = $data['chartData']['weights'] ?? [];
+        
         $lastTrend = !empty($trends) ? end($trends) : null;
+        $lastWeight = !empty($weights) ? end($weights) : null;
+        
+        // Calculate the last variation
+        $lastVariation = null;
+        if ($lastWeight && $lastTrend) {
+            $lastVariation = round($lastWeight - $lastTrend, 1);
+        }
 
         return response()->json([
             'days' => $data['days'],
             'stats' => [
-                'current_weight' => $lastTrend,
+                'current_weight' => $lastWeight,
+                'current_trend' => $lastTrend,
+                'current_variation' => $lastVariation,
                 'total_days_logged' => collect($data['days'])->filter(fn($day) => !is_null($day['weight']))->count(),
-                'weight_change' => $this->calculateWeightChange($trends)
+                'weight_change' => $this->calculateWeightChange($trends),
+                'today' => $today ? [
+                    'exercise_rung' => $today->exercise_rung,
+                    'notes' => $today->notes
+                ] : null
             ]
         ]);
     }
