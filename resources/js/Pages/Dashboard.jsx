@@ -96,7 +96,7 @@ export default function Dashboard({ auth }) {
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
-                                            <span className="text-gray-100 text-3xl mt-2">{dashboardData.stats?.current_weight || ''}</span>
+                                            <span className="text-gray-100 text-3xl mt-2">{dashboardData.stats?.current_weight || ''} <span className="text-sm">lbs</span></span>
                                         </div>
                                         {dashboardData.stats?.current_weight && dashboardData.stats?.current_trend && (
                                             <div className="flex justify-between">
@@ -134,12 +134,6 @@ export default function Dashboard({ auth }) {
                                     </p>
                                 </div>
                                 <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
-                                    <h3 className="text-gray-400 text-xs md:text-base">30-Day Change</h3>
-                                    <p className="text-3xl mt-2 text-white">
-                                        <span className="text-green-400">↓</span> 1.2 lbs
-                                    </p>
-                                </div>
-                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
                                     <h3 className="text-gray-400 text-xs md:text-base">Body Mass Index</h3>
                                     <p className="text-3xl mt-2 text-white">
                                          25.9 &nbsp;<span className="text-orange-400">🟡</span>
@@ -148,13 +142,33 @@ export default function Dashboard({ auth }) {
                                 <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
                                     <h3 className="text-gray-400 text-xs md:text-base">Daily Calorie Deficit</h3>
                                     <p className="text-3xl mt-2 text-white">
-                                        <span className="text-green-400">↓</span> 1,200
+                                        <span className="text-green-400">↓</span>1,200
                                     </p>
                                 </div>
                                 <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
-                                    <h3 className="text-gray-400 text-xs md:text-base">Avg Weekly Loss</h3>
+                                    <h3 className="text-gray-400 text-xs md:text-base">Avg Weekly Change</h3>
                                     <p className="text-3xl mt-2 text-white">
-                                        <span className="text-green-400">↓</span> 0.4 lbs
+                                        {dashboardData.stats?.weekly_average ? (
+                                            <>
+                                                <span className={dashboardData.stats.weekly_average > 0 ? 'text-red-400' : 'text-green-400'}>
+                                                    {dashboardData.stats.weekly_average > 0 ? '↑' : '↓'}
+                                                </span>
+                                                {Math.abs(dashboardData.stats.weekly_average)} <span className="text-sm">lbs</span>
+                                            </>
+                                        ) : '-'}
+                                    </p>
+                                </div>
+                                <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
+                                    <h3 className="text-gray-400 text-xs md:text-base">30-Day Change</h3>
+                                    <p className="text-3xl mt-2 text-white">
+                                        {dashboardData.stats?.thirty_day_change ? (
+                                            <>
+                                                <span className={dashboardData.stats.thirty_day_change > 0 ? 'text-red-400' : 'text-green-400'}>
+                                                    {dashboardData.stats.thirty_day_change > 0 ? '↑' : '↓'}
+                                                </span>
+                                                {Math.abs(dashboardData.stats.thirty_day_change)} <span className="text-sm">lbs</span>
+                                            </>
+                                        ) : '-'}
                                     </p>
                                 </div>
                             </div>

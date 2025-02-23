@@ -90,7 +90,7 @@ export default function Logs({ auth }) {
         >
             <Head title="Dashboard" />
 
-            <div className="py-0 bg-gray-900">
+            <div className="py-0 sm:mt-6 bg-gray-900">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-gray-800 shadow-sm sm:rounded-lg">
                         <div className="p-6">

@@ -167,6 +167,19 @@ class DashboardController extends Controller
         // Calculate tracking streak
         $streak = $this->calculateTrackingStreak();
 
+        // Calculate 30-day change and weekly average
+        $thirtyDayChange = null;
+        $weeklyAverage = null;
+        
+        if (!empty($trends)) {
+            $oldestTrend = $trends[0];
+            $latestTrend = end($trends);
+            $thirtyDayChange = round($latestTrend - $oldestTrend, 1);
+            
+            // Calculate weekly average (30 days = ~4.286 weeks)
+            $weeklyAverage = round($thirtyDayChange / 4.286, 1);
+        }
+
         return response()->json([
             'days' => $data['days'],
             'stats' => [
@@ -174,7 +187,8 @@ class DashboardController extends Controller
                 'current_trend' => $lastTrend,
                 'current_variation' => $lastVariation,
                 'tracking_streak' => $streak,
-                'weight_change' => $this->calculateWeightChange($trends),
+                'thirty_day_change' => $thirtyDayChange,
+                'weekly_average' => $weeklyAverage,
                 'today' => $today ? [
                     'exercise_rung' => $today->exercise_rung,
                     'notes' => $today->notes
