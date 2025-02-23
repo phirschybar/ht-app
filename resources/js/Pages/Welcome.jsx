@@ -1,6 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import { useState } from 'react';
+
 export default function Welcome({ auth }) {
+    const [showMore, setShowMore] = useState(false);
+
     return (
         <>
             <Head title="Welcome" />
@@ -8,7 +12,7 @@ export default function Welcome({ auth }) {
                 <div className="relative flex min-h-screen flex-col items-center justify-center">
                     <div className="relative w-full max-w-2xl px-6">
                         {/* Centered Logo */}
-                        <div className="flex justify-center mb-0">
+                        <div className="flex justify-center mt-6">
                             <ApplicationLogo className="block h-32 w-auto fill-current text-gray-200" />
                         </div>
 
@@ -32,7 +36,26 @@ export default function Welcome({ auth }) {
                                         Get early warning signs of plateauing or digression
                                     </li>
                                 </ul>
-                                <p className="text-white/70 pt-2 text-center"><a href="" className="text-blue-400 hover:text-blue-300">Read More</a></p>
+                                
+                                {showMore && (
+                                    <div className="text-white/70 pt-4">
+                                        <p className="mb-4">
+                                            The key insight is that your weight naturally fluctuates day-to-day due to water retention, digestive status, and other factors. By tracking daily and using a moving average, we can see through the noise to identify real trends in weight change.
+                                        </p>
+                                        <p>
+                                            This app provides the tools you need to track your weight, visualize trends, and make data-driven decisions about your health journey.
+                                        </p>
+                                    </div>
+                                )}
+                                
+                                <p className="text-white/70 pt-2 text-center">
+                                    <button 
+                                        onClick={() => setShowMore(!showMore)}
+                                        className="text-blue-400 hover:text-blue-300"
+                                    >
+                                        {showMore ? 'Show Less' : 'Read More'}
+                                    </button>
+                                </p>
                             </div>
 
                             {/* Auth Buttons */}

@@ -164,13 +164,16 @@ class DashboardController extends Controller
             $lastVariation = round($lastWeight - $lastTrend, 1);
         }
 
+        // Calculate tracking streak
+        $streak = $this->calculateTrackingStreak();
+
         return response()->json([
             'days' => $data['days'],
             'stats' => [
                 'current_weight' => $lastWeight,
                 'current_trend' => $lastTrend,
                 'current_variation' => $lastVariation,
-                'total_days_logged' => collect($data['days'])->filter(fn($day) => !is_null($day['weight']))->count(),
+                'tracking_streak' => $streak,
                 'weight_change' => $this->calculateWeightChange($trends),
                 'today' => $today ? [
                     'exercise_rung' => $today->exercise_rung,
@@ -178,6 +181,56 @@ class DashboardController extends Controller
                 ] : null
             ]
         ]);
+    }
+
+    private function calculateTrackingStreak()
+    {
+        $today = now()->startOfDay();
+        $yesterday = $today->copy()->subDay();
+        
+        // Get all days with any data, ordered by date descending
+        $days = Day::where('user_id', auth()->id())
+            ->where('date', '<=', $today->format('Y-m-d'))
+            ->where(function($query) {
+                $query->whereNotNull('weight')
+                    ->orWhereNotNull('exercise_rung')
+                    ->orWhereNotNull('notes');
+            })
+            ->orderBy('date', 'desc')
+            ->pluck('date');
+
+        if ($days->isEmpty()) {
+            return 0;
+        }
+
+        $streak = 0;
+        $latestDate = Carbon::parse($days->first());
+        
+        // If the most recent entry is today, start streak at 1
+        if ($latestDate->format('Y-m-d') === $today->format('Y-m-d')) {
+            $streak = 1;
+            $latestDate = $yesterday; // Move to yesterday for the rest of the calculation
+        }
+
+        // Continue counting streak from previous days
+        foreach ($days as $date) {
+            $currentDate = Carbon::parse($date);
+            
+            // Skip today's entry as we've already counted it
+            if ($currentDate->format('Y-m-d') === $today->format('Y-m-d')) {
+                continue;
+            }
+            
+            // Check if this date is exactly one day before the latest date
+            if ($latestDate->format('Y-m-d') === $currentDate->format('Y-m-d')) {
+                $streak++;
+                $latestDate = $currentDate->copy()->subDay();
+            } else {
+                break;
+            }
+        }
+
+        return $streak;
     }
 
     private function calculateWeightChange($trends)
