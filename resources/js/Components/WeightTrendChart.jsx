@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 export default function WeightTrendChart({ days }) {
     
@@ -49,15 +49,6 @@ export default function WeightTrendChart({ days }) {
                         tickCount={maxValue - minValue + 3}
                         allowDecimals={false}
                         tick={{ fontSize: 11 }}
-                    />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: '#1F2937',
-                            border: '1px solid #4B5563',
-                            borderRadius: '0.375rem'
-                        }}
-                        labelStyle={{ color: '#F3F4F6' }}
-                        itemStyle={{ color: '#F3F4F6' }}
                     />
                     {/* Add vertical reference lines */}
                     {chartData.map((point, index) => (

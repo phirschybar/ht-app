@@ -115,7 +115,7 @@ export default function Dashboard({ auth }) {
                                 <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
                                     <h3 className="text-gray-400 text-xs md:text-base">Trend Streak</h3>
                                     <p className="text-3xl mt-2 text-white">
-                                        24 days
+                                        24d &nbsp;🔥
                                     </p>
                                 </div>
                                 <div className="a-stat p-4 bg-gray-700 rounded-lg min-h-[140px]">
