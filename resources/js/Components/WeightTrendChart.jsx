@@ -10,9 +10,9 @@ export default function WeightTrendChart({ days }) {
             fullDate: day.date,
             weight: day.weight || null,
             trend: day.trend || null,
-            index: days.length - index  // Reverse index for proper ordering
+            index: days.length - index  // Revert back to original index calculation
         };
-    });
+    }).reverse();  // Reverse the array after mapping
 
     // Check if there's any weight data at all
     const hasData = chartData.some(day => day.weight !== null);
@@ -181,7 +181,12 @@ export default function WeightTrendChart({ days }) {
                         tick={{ fontSize: 11 }}
                         tickFormatter={(value) => {
                             const day = chartData.find(d => d.index === value);
-                            return day ? day.name : '';
+                            if (day) {
+                                const date = new Date(day.fullDate);
+                                date.setDate(date.getDate() + 1); // Add one day to fix alignment
+                                return date.getDate();
+                            }
+                            return '';
                         }}
                         domain={['dataMin', 'dataMax']}
                         type="number"
