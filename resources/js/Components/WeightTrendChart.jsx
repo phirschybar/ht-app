@@ -3,11 +3,16 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Refe
 export default function WeightTrendChart({ days }) {
     
     // Map all days, keeping nulls for missing data
-    const chartData = days.map(day => ({
-        name: parseInt(day.date.split('-')[2]), // Convert to integer to remove leading zeros
-        weight: day.weight || null,
-        trend: day.trend || null
-    }));
+    const chartData = days.map((day, index) => {
+        const date = new Date(day.date);
+        return {
+            name: date.getDate(),
+            fullDate: day.date,
+            weight: day.weight || null,
+            trend: day.trend || null,
+            index: days.length - index  // Reverse index for proper ordering
+        };
+    });
 
     // Check if there's any weight data at all
     const hasData = chartData.some(day => day.weight !== null);
@@ -23,6 +28,138 @@ export default function WeightTrendChart({ days }) {
     const maxValue = Math.ceil(Math.max(...allValues));
     const padding = 1;
 
+    const options = {
+        chart: {
+            id: 'weight-trend',
+            type: 'line',
+            toolbar: {
+                show: false
+            },
+            animations: {
+                enabled: false
+            },
+            background: '#1f2937'
+        },
+        grid: {
+            show: true,
+            borderColor: '#374151',
+            strokeDashArray: 1,
+            position: 'back',
+            xaxis: {
+                lines: {
+                    show: true
+                }
+            },
+            yaxis: {
+                lines: {
+                    show: true
+                }
+            },
+            padding: {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+            }
+        },
+        xaxis: {
+            type: 'numeric',
+            tickAmount: days.length,
+            labels: {
+                formatter: function(value) {
+                    const date = new Date(days[Math.floor(value) - 1]?.date);
+                    return date ? `${date.getDate()}` : '';
+                },
+                style: {
+                    colors: '#9ca3af'
+                }
+            },
+            tooltip: {
+                enabled: false
+            },
+            axisBorder: {
+                show: false
+            },
+            axisTicks: {
+                show: false
+            },
+            tickFormatter: (value) => {
+                const dayIndex = chartData.findIndex(d => d.name === value);
+                if (dayIndex >= 0 && days[dayIndex]) {
+                    const date = new Date(days[dayIndex].date);
+                    return date.getDate();
+                }
+                return '';
+            },
+            interval: 0
+        },
+        yaxis: {
+            title: {
+                text: 'Weight'
+            },
+            min: minValue - padding,
+            max: maxValue + padding,
+            tickCount: maxValue - minValue + 3,
+            allowDecimals: false,
+            labels: {
+                style: {
+                    colors: '#9ca3af'
+                }
+            }
+        },
+        series: [
+            {
+                name: 'Weight',
+                type: 'line',
+                data: chartData.map(data => ({
+                    x: data.name,
+                    y: data.weight
+                })),
+                color: '#FFFFFF'
+            },
+            {
+                name: 'Trend',
+                type: 'line',
+                data: chartData.map(data => ({
+                    x: data.name,
+                    y: data.trend
+                })),
+                color: 'rgb(255, 99, 132)'
+            }
+        ],
+        stroke: {
+            width: 2
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shade: 'dark',
+                type: 'vertical',
+                shadeIntensity: 0.5,
+                gradientToColors: ['#374151'],
+                inverseColors: true,
+                opacityFrom: 0.8,
+                opacityTo: 0
+            }
+        },
+        tooltip: {
+            enabled: true,
+            theme: 'dark',
+            x: {
+                format: 'dd MMM'
+            },
+            y: {
+                formatter: function(value) {
+                    return value.toFixed(2);
+                }
+            }
+        },
+        legend: {
+            position: 'top'
+        },
+        background: '#1f2937'
+    };
+
     return (
         <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -37,11 +174,20 @@ export default function WeightTrendChart({ days }) {
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis 
-                        dataKey="name" 
+                        dataKey="index"
                         stroke="#9CA3AF"
                         angle={0}
                         height={30}
                         tick={{ fontSize: 11 }}
+                        tickFormatter={(value) => {
+                            const day = chartData.find(d => d.index === value);
+                            return day ? day.name : '';
+                        }}
+                        domain={['dataMin', 'dataMax']}
+                        type="number"
+                        reversed={true}
+                        interval={0}
+                        ticks={chartData.map(d => d.index)}
                     />
                     <YAxis 
                         stroke="#9CA3AF"
@@ -56,8 +202,8 @@ export default function WeightTrendChart({ days }) {
                             <ReferenceLine
                                 key={`ref-${index}`}
                                 segment={[
-                                    { x: point.name, y: point.weight },
-                                    { x: point.name, y: point.trend }
+                                    { x: point.index, y: point.weight },
+                                    { x: point.index, y: point.trend }
                                 ]}
                                 stroke={point.weight > point.trend ? 'rgb(255, 99, 132)' : 'rgb(75, 192, 192)'}
                                 strokeWidth={2}
@@ -75,7 +221,6 @@ export default function WeightTrendChart({ days }) {
                                     ? 'rgb(255, 99, 132)'  // Above trend - red
                                     : 'rgb(75, 192, 192)'  // Below trend - green
                                 return <circle 
-                                    key={`weight-dot-${props.payload.name}`}
                                     cx={props.cx} 
                                     cy={props.cy} 
                                     r={3} 
@@ -86,7 +231,6 @@ export default function WeightTrendChart({ days }) {
                         }}
                         strokeWidth={0}
                         connectNulls={false}
-                        name="Weight"
                         isAnimationActive={false}
                     />
                     <Line
@@ -99,7 +243,6 @@ export default function WeightTrendChart({ days }) {
                                     ? 'rgb(255, 99, 132)'  // Weight above trend - red
                                     : 'rgb(75, 192, 192)'  // Weight below trend - green
                                 return <circle 
-                                    key={`trend-dot-${props.payload.name}`}
                                     cx={props.cx} 
                                     cy={props.cy} 
                                     r={3} 
@@ -110,7 +253,6 @@ export default function WeightTrendChart({ days }) {
                         }}
                         strokeWidth={2}
                         connectNulls={true}
-                        name="Trend"
                         isAnimationActive={false}
                     />
                 </LineChart>
