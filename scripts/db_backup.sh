@@ -4,7 +4,7 @@
 APP_PATH="/var/www/hacktrack"
 BACKUP_DIR="/tmp/mysql_backups"
 BUCKET_NAME="hacktrack-db-backups"
-DATE=$(date +%Y-%m-%d)
+DATE=$(date +%Y-%m-%d-%H%M%S)
 
 # Source Laravel environment variables
 if [ -f "$APP_PATH/.env" ]; then
